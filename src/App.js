@@ -1,26 +1,43 @@
 import React from 'react';
-import logo from './logo.svg';
-import './App.css';
+import { BrowserRouter as Router, Route, useHistory } from 'react-router-dom';
+import { Security, SecureRoute, LoginCallback } from '@okta/okta-react';
+import { Container } from 'semantic-ui-react';
+import config from './config';
+import CustomLoginComponent from './Login';
+import Navbar from './NavBar';
+import Profile from './Profile';
+import Home from './Home';
 
-function App() {
+const HasAccessToRouter = () => {
+  const history = useHistory(); // example from react-router
+
+  const customAuthHandler = () => {
+    // Redirect to the /login page that has a CustomLoginComponent
+    history.push('/login');
+  };
+
   return (
-    <div className="App">
-      <header className="App-header">
-        <img src={logo} className="App-logo" alt="logo" />
-        <p>
-          Edit <code>src/App.js</code> and save to reload.
-        </p>
-        <a
-          className="App-link"
-          href="https://reactjs.org"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          Learn React
-        </a>
-      </header>
-    </div>
+    <Security
+      {...config}
+      onAuthRequired={customAuthHandler}
+    >
+      <Navbar />
+      <Container text style={{ marginTop: '7em' }}>
+        <Route path="/" exact component={Home} />
+        <Route path="/implicit/callback" component={LoginCallback} />
+        <Route path="/login" exact component={CustomLoginComponent} />
+        <SecureRoute path="/profile" component={Profile} />
+      </Container>
+    </Security>
   );
-}
+};
+
+const App = () => (
+  <div>
+    <Router>
+      <HasAccessToRouter />
+    </Router>
+  </div>
+);
 
 export default App;
